@@ -1,1 +1,2 @@
-# JCORRAN
+# JCORRAN 
+   * partial init
