@@ -1,0 +1,8 @@
+
+SRCS=AliJCORRANTask.cxx 
+
+HDRS:= $(SRCS:.cxx=.h) src/containers/AliJConst.h 
+
+DHDR:= PWG4JCORRANLinkDef.h
+
+EXPORT:=$(SRCS:.cxx=.h)

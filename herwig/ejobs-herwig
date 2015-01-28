@@ -1,0 +1,59 @@
+#!/bin/csh -f
+############################
+
+
+set PROG=`basename $0`
+ if ( $#argv < 1 ) then
+  echo
+  echo "Usage: $PROG <outname>  "
+  exit
+endif
+
+setenv runconfig $1
+setenv comment $2
+#################################
+# Output file locations
+#################################
+setenv Main_DIR     `pwd`
+setenv DoWhat        Herwig++       
+setenv oname         Herwig-hh-$comment
+setenv Disk         `pwd`
+setenv OUT_ERRORS   $Disk/outputs/${oname}/errors
+setenv Out_DIR      $Disk/outputs/${oname}/data
+setenv Wrk_DIR      $Disk/outputs/${oname}/wrk
+setenv LOG_DIR      $Disk/outputs/${oname}/logs
+#################################
+# Need for serial job in sepeli(pbs)
+#################################
+setenv noFileToRun 3000 
+#################################
+
+mkdir -p $OUT_ERRORS
+mkdir -p $Out_DIR
+mkdir -p $Wrk_DIR
+mkdir -p $LOG_DIR
+
+#################################
+# Runlist to scan
+#################################
+
+# simplify this !!! 
+cat << EOF > exec_herwig_$comment
+#!/bin/csh -f
+cd $Main_DIR
+setenv what  $DoWhat
+setenv sedN  30000000
+setenv iseg \$SLURM_ARRAY_TASK_ID
+@ sedN = \${sedN} + \${iseg}
+setenv outfile  $Out_DIR/$DoWhat-\$sedN.root 
+setenv Log      $LOG_DIR/$DoWhat-\$sedN.log
+setenv wrkdir   $Wrk_DIR/\$iseg
+mkdir -p \$wrkdir
+cd \$wrkdir
+ln -sf $Main_DIR/* .
+Herwig++ run $runconfig -N500000 -s \$sedN >& \$Log
+mv jcorran.root \$outfile
+cd $Main_DIR
+EOF
+chmod +x exec_herwig_$comment
+    sbatch -v --array=1-$noFileToRun exec_herwig_$comment -J $comment  -e $OUT_ERRORS/slurm-%A_%a.out -o $OUT_ERRORS/slurm-%A_%a.out

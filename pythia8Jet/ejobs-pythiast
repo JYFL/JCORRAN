@@ -1,0 +1,56 @@
+#!/bin/csh -f
+############################
+
+
+set PROG=`basename $0`
+ if ( $#argv < 1 ) then
+  echo
+  echo "Usage: $PROG <outname>  "
+  exit
+endif
+
+setenv pyconfigname $1
+setenv comment $2
+#################################
+# Output file locations
+#################################
+setenv Main_DIR     `pwd`
+setenv DoWhat       jtkt_pythia8
+setenv oname        $comment
+setenv Disk         `pwd`
+setenv OUT_ERRORS   $Disk/outputs/${oname}/errors
+setenv Out_DIR      $Disk/outputs/${oname}/data
+setenv LOG_DIR      $Disk/outputs/${oname}/logs
+#################################
+# Need for serial job in sepeli(pbs)
+#################################
+setenv noFileToRun 2000
+#################################
+
+mkdir -p $OUT_ERRORS
+mkdir -p $Out_DIR
+mkdir -p $LOG_DIR
+
+#################################
+# Runlist to scan
+#################################
+
+# simplify this !!! 
+cat << EOF > exec_jtkt_$comment
+#!/bin/csh -f
+cd $Main_DIR
+setenv what  $DoWhat
+setenv sedN  300000
+setenv iseg \$SLURM_ARRAY_TASK_ID
+@ sedN = \${sedN} + \${iseg}
+setenv outfile  $Out_DIR/$comment-\$sedN.root 
+setenv Log      $LOG_DIR/$comment-\$sedN.log
+setenv pySetting      $LOG_DIR/$comment-\$sedN.config
+./\${what} xxx \$outfile cardAlice_pp.input hadron hadron $pyconfigname \$pySetting \$sedN >& \$Log
+cd $Main_DIR
+EOF
+#\${what} \$outfile \$sedN 5000000 >& \$Log
+chmod +x exec_jtkt_$comment
+	#qsub -a 201008240200 -V -t 1-$noFileToRun -S /bin/tcsh -r y -e $OUT_ERRORS -o $OUT_ERRORS exec_jtkt_$comment
+	#qsub -V -t 1-$noFileToRun -S /bin/tcsh -r y -e $OUT_ERRORS -o $OUT_ERRORS exec_jtkt_$comment
+    sbatch -v --array=1-$noFileToRun exec_jtkt_$comment -J $comment  -e $OUT_ERRORS/slurm-%A_%a.out -o $OUT_ERRORS/slurm-%A_%a.out

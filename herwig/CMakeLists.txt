@@ -1,0 +1,10 @@
+include ( ${JCORRAN_CMAKE_DIR}/JCORRAN_CMake.cmake  OPTIONAL )
+# !!!! DON'T TOUCH ABOVE !!!!
+
+PROJECT ( jtkt_herwig )
+JCORRAN_PACKAGE ( jtkt_herwig )
+
+set ( SRCS ${JCORRAN_PACKAGE}.cxx )
+
+JCORRAN_LOAD_HERWIG( $ENV{HERWIG} $ENV{THEPEG} )
+JCORRAN_ADD_SUBDIR( src )

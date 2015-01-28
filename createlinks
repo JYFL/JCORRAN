@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PROG=`basename $0`
+if [ $# -ne 1 ]
+then
+    echo "Usage: $PROG [dir]"
+    exit;
+fi
+
+cd $1
+
+cp ../local/card* .
+ln -s ../local/domerge
+ln -s ../local/mergeList.sh
+ln -s ../local/ejobs_template ejobs_AA_2.7_LHC10h
+ln -s ../local/ejobs_template ejobs_pA_5.0_LHC13bc
+ln -s ../local/ejobs_template ejobs_pA_5.0_LHC13bcde
+ln -s ../local/ejobs_template ejobs_pp_2.7_LHC11a
+ln -s ../local/ejobs_template ejobs_pp_7.0_LHC10bcde   
+ln -s ../local/jtkt_alice
+ln -s ../local/lolo
+
+cd ..

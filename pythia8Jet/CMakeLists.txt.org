@@ -1,0 +1,15 @@
+include ( ${JCORRAN_CMAKE_DIR}/JCORRAN_CMake.cmake  OPTIONAL )
+# !!!! DON'T TOUCH ABOVE !!!!
+
+PROJECT ( jtkt_pythia )
+JCORRAN_PACKAGE ( jtkt_pythia )
+
+set ( SRCS ${JCORRAN_PACKAGE}.cxx )
+
+JCORRAN_LOAD_PYTHIA( $ENV{PYTHIA8} )
+
+JCORRAN_ADD_SUBDIR( src )
+
+JCORRAN_ADD_DIR( ../PWGJCORRAN/src ../PWGJCORRAN/src/containers ../PWGJCORRAN/src/utils src )
+JCORRAN_ADD_LIB( JCORRANpythia )
+JCORRAN_BUILD_EXE()

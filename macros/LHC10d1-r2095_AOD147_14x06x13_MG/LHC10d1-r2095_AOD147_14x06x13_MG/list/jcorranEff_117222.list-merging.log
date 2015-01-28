@@ -1,0 +1,27 @@
+INPUT : list/jcorranEff_117222.list
+OUTPUT : merged/jcorranEff_117222.list.root
+NCores : 4
+16807
+Mon Jun 23 11:46:55 EEST 2014
+hadd Target file: /tmp/bschang/batch/PID16807-20140623-114655-merge-list/jcorranEff_117222.list-21570/xaa.root
+hadd Source file 1: output/117222/011/jcorranEff.root
+hadd Source file 2: output/117222/004/jcorranEff.root
+hadd Source file 3: output/117222/013/jcorranEff.root
+hadd Source file 4: output/117222/001/jcorranEff.root
+hadd Source file 5: output/117222/007/jcorranEff.root
+hadd Source file 6: output/117222/009/jcorranEff.root
+hadd Source file 7: output/117222/012/jcorranEff.root
+hadd Source file 8: output/117222/008/jcorranEff.root
+hadd Source file 9: output/117222/010/jcorranEff.root
+hadd Source file 10: output/117222/003/jcorranEff.root
+hadd Source file 11: output/117222/005/jcorranEff.root
+hadd Source file 12: output/117222/014/jcorranEff.root
+hadd Source file 13: output/117222/006/jcorranEff.root
+hadd Target path: /tmp/bschang/batch/PID16807-20140623-114655-merge-list/jcorranEff_117222.list-21570/xaa.root:/
+hadd Target path: /tmp/bschang/batch/PID16807-20140623-114655-merge-list/jcorranEff_117222.list-21570/xaa.root:/EffHist
+hadd Target file: merged/jcorranEff_117222.list.root
+hadd Source file 1: /tmp/bschang/batch/PID16807-20140623-114655-merge-list/jcorranEff_117222.list-21570/xaa.root
+hadd Target path: merged/jcorranEff_117222.list.root:/
+hadd Target path: merged/jcorranEff_117222.list.root:/EffHist
+Mon Jun 23 11:46:59 EEST 2014
+==== Time : 4

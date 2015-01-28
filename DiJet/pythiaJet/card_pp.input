@@ -1,0 +1,107 @@
+TriggerMask             0 # 62 masking on see bottom 0011:1110   -1 no check
+Helicity		0 # +1 same, -1 opposite, and 0 no helicity check
+EfficiencyMode          1 # 0:NoEff 1:Period 2:RunbyRun 3:Auto
+
+#events=========
+#CentBinBorders         0 10 20 40 60 90
+CentBinBorders          0 100 
+CentMultCutHigh         0.63,  99, 2.1   # hyperbola high cent x mult cut
+CentMultCutLow          0.71,  75, 1.0   # hyperbola  low cent x mult cut
+
+
+zVertBins               -10 10 
+#maxAbsZVert             8  #(used to be 10)
+#maxMixDZ		1.0 #	cm, allowed maximum ZVert distance for mix (5 for QM)/ neg -> no test
+
+#mixing=========
+maxDCent                5   #   check the mix if cent bin too wide
+maxMixDMult		100  #	assoc mult so far. Later ITS tracklets
+EventPoolDepth          500 #   one pool for cent
+
+#====================
+#==== binning =======
+#====================
+CorrelationType         0 # 0=all x all  1=trig LP  2=trigg Pair
+sumTriggerAndAssoc      0 # 0 trigger LP  1 trigger+assoc
+
+#--- ours ---
+TriggPtBorders                  3 4 5 6 8 10 12 15 18 25
+AssocPtBorders          0.3 1 2 3 4 5 6 8 10    15
+KlongBorders                1 2 3 4   6 8    12 
+xEBorders		0.0 0.2 0.4 0.6  1.0
+
+#--- JFG --- 
+#TriggPtBorders                2 3 4     8       15
+#AssocPtBorders          0.5 1 2 3 4   6 8
+#KlongBorders                1 2
+
+#--- UE paper ---
+#TriggPtBorders          0.5 1.5 2 4 6 10
+#AssocPtBorders          0.5 1 10
+#KlongBorders                1 2
+
+PairInvariantMassBins   20 30
+UpperPairPtCut          1.5 15
+EtaRange                0.8
+EtaGapThresholds        0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6
+EtaGapSignalBin         2  #signal histos to R<0.6
+
+DPhiUERegion            0.325 0.475
+
+#======= Isolation tracks =============
+IsolationR              0.4 #isolation radius for higher twist
+CutOnBkgActivity        0.10 #cut on activity around leading particle   sum of assoc pt / LP pt
+LowerPtCut              1.0 #for isolation
+
+#======= ALICE JYFL Track selection =============
+HadronSelectionCut      7 # 0:TPCOnly 1:Raa 3:TPCPlus 7:Hybrid
+
+TriggerFiducialEtaCut 0.4 #
+
+# Mixing algo ===================
+massMix			0	# mass mixing yes=1 no=0
+massMixMB		2	# 0=trigger/trigger 1=trigger/MB 2=MB/MB
+massMixMax		5 # max ammount of mixes for one input event
+
+# EMCal data processing =========
+emcalUseSM	-1		#  EMCal SM to use -1 = all
+eventBC		-1		# select only events in BC modulo 4; -1 to disable
+emcalPpDoNLM	0			# find number of local maxima: 1 enabled, 0 disabled
+emcalPpDoMomentaVertex	1			# relate momenta to vertex: 1 enabled, 0 disabled
+emcalPpDoEvars 		1			# compute additional E vars: 1 enabled, 0 disabled
+emcalPpDoMC 		0			# track MC conversion etc.: 1 enabled, 0 disabled
+emcalPpMaxCutEDiff	0.050	# Local maxima diff E
+emcalPpMaxCutE 		0.200	# Local maxima E
+emcalDoTowers		0			# wheather to create & fill tower by tower histos
+emcalDoQA		0			# create & fill EMCal QA histos
+emcalDoPairQA		0 		# create & fill EMCal pair QA histos
+emcalDoMC		0 		# process MC data
+
+# Pi0 analysis cuts =============
+#    Cluster cuts --------------- (on top of those in tender)
+minEnergy		1.5		# Cluster Min Enery cut 0.2
+emcalExoticCut		1.0		# 1-emax/ecross, 0.97 standard
+emcalExoticCutStart	0			# [GeV] apply the cut from
+emcalMatchedCut		-1 		# maximum number of matched tracks allowed, -1 to disable
+emcalOfflineTrigger	0.0		# offline trigger threshold
+emcalLambda02Cut	-1 5	# main axis shower shape
+emcalNCellCut		2			# minimum amount of cells per cluster
+#    Pair cuts ------------------
+pi0AsymRange		0.0 0.6	# Assymetry 0.8
+# put any of the pi0Conv cuts to 0 to disable the cutting, maximize to neglect
+pi0ConvDelta		0 # cut on conversion plane 0 to 1/2pi
+pi0ConvTheta		0 # cut on conversion theta [rad]
+pi0ConvDZ		0 # cut on conversion dZ [cm]
+pi0ConvDPhi		0 # cut on conversion dPhi [rad]
+pi0ConvAsymm		0 # cut on conversion asymmetry
+pi0DoSMCut		1 		# request both clusters to be in the same sm 0 = disabled, 1 = enabled
+pi0PtRange		0.5 1000.0	# pt   range for pi0
+pi0MassRange		0.0 2.0	# mass range for pi0 0.05 0.7
+pi0BgnMass		0.05 0.1 0.2 0.3 0.4	# out off pi0 bgn bin(0.2 0.3)
+pi0UseSM                -1 # SM cut for pair reconstruction
+
+cent0 0.110931 0.157124 0.11206 0.155969 0.112079 0.156054 0.111651 0.158436 0.112533 0.155025 0.110471 0.158608 0.11513 0.160429 0.123506 0.169822
+cent1 0.110931 0.157124 0.11206 0.155969 0.112079 0.156054 0.111651 0.158436 0.112533 0.155025 0.110471 0.158608 0.11513 0.160429 0.123506 0.169822
+cent2 0.110931 0.157124 0.11206 0.155969 0.112079 0.156054 0.111651 0.158436 0.112533 0.155025 0.110471 0.158608 0.11513 0.160429 0.123506 0.169822
+cent3 0.110931 0.157124 0.11206 0.155969 0.112079 0.156054 0.111651 0.158436 0.112533 0.155025 0.110471 0.158608 0.11513 0.160429 0.123506 0.169822
+

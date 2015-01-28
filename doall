@@ -1,0 +1,111 @@
+#!/bin/csh -f 
+
+# launch/merge/clean
+set PROG=`basename $0`
+ if ( $#argv < 1 ) then
+  echo "Usage: $PROG [arg]"
+  echo "arg = [submit or s] [m1 or m2] [clean or c] [lolo or l]"
+  exit
+endif
+
+setenv dowhat $1
+echo "$dowhat"
+
+setenv l ""
+
+#setenv l "$l lpp2.7_1"
+#setenv l "$l lpp2.7_2"
+#setenv l "$l lpp2.7_5"
+
+#setenv l "$l lpp7.0_1"
+#setenv l "$l lpp7.0_2"
+setenv l "$l lpp7.0_5"
+
+#setenv l "$l lpA5.0_1"
+#setenv l "$l lpA5.0_2"
+#setenv l "$l lpA5.0_5"
+
+#setenv l "$l lAA2.7_1"
+#setenv l "$l lAA2.7_2"
+#setenv l "$l lAA2.7_5"
+echo $l
+
+foreach f ($l)
+	setenv spec  `echo $f | awk '{print substr($1,2,2)}'`
+	setenv sqrts `echo $f | awk '{print substr($1,4,3)}'`
+	setenv cut   `echo $f | awk '{print substr($1,8,1)}'`
+	echo " --- "$f, $spec $sqrts $cut" --- "
+
+	if( $dowhat == "submit" || $dowhat == "s" ) then
+		mkdir $f; ./createlinks $f
+	endif
+	cd $f
+
+	setenv card `echo $spec|awk '{print "cardAlice_"$1".input"}'`
+
+	if ($spec == "AA" && $sqrts == "2.7") then
+	setenv ejob "ejobs_AA_2.7_LHC10h" 
+	else if ($spec == "pA" && $sqrts == "5.0") then
+	setenv ejob "ejobs_pA_5.0_LHC13bcde"
+	else if ($spec == "pp" && $sqrts == "2.7") then
+	setenv ejob "ejobs_pp_2.7_LHC11a"
+	else if ($spec == "pp" && $sqrts == "7.0") then
+	setenv ejob "ejobs_pp_7.0_LHC10bcde"
+	endif 
+
+	if ($cut == 0) then
+	setenv cutname "TPCOnly"
+	else if ($cut == 1) then
+	setenv cutname "Raa"
+	else if ($cut == 2) then
+	setenv cutname "GlobalTightDCA"
+	else if ($cut == 5) then
+	setenv cutname "Hybrid"
+	endif
+
+	perl -i -ple's/HadronSelectionCut\s+\d/HadronSelectionCut\t$ENV{cut}/'  $card
+	#perl -i -ple's/CorrelationType\s+\d/CorrelationType\t 0/'  $card
+
+	echo $card; cat $card |grep 'HadronSelectionCut\|TriggPtBorders'; echo ""
+	#echo $card; cat $card |grep 'CorrelationType\|TriggPtBorders'; echo ""
+
+
+	if( $dowhat == "submit" || $dowhat == "s" ) then
+		echo "Submitting jobs...."
+		#./$ejob ours_allTrigg_Nov01_Flat_${cutname}_1978_xT ""
+		if ($spec == "pp" && $sqrts == "2.7") then
+		./$ejob kT_Apr2014_${cutname}_1983 /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/data/ours_allTrigg_Oct10_Flat_${cutname}_1862_pp2.76TeV_LHC11a_pass2_without_SDD_20130214.root
+		else if ($spec == "pp" && $sqrts == "7.0") then
+		./$ejob kT_Apr2014_${cutname}_1998 /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/data/ours_allTrigg_Nov01_Flat_${cutname}_1978_xT_pp7TeV_LHC10bcde.root
+		else if ($spec == "pA" && $sqrts == "5.0") then
+		#./$ejob ours_allTrigg_Jan13_Flat_${cutname}_2096_kINT7 ""
+		./$ejob kT_Apr2014_${cutname}_2101_kINT7_ntrial0 /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/data/ours_allTrigg_Jan13_Flat_${cutname}_2096_kINT7_LHC13bcde_AOD_v5-34-08-AN_r2085.root
+		#./$ejob ours_allTrigg_Nov22_Flat_${cutname}_2046_kEMCEJE ""
+		#./$ejob ours_allTrigg_Nov19_Incl_${cutname}_2038_kINT7 /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/data/ours_allTrigg_Oct24_Flat_${cutname}_1921_kINT7_MBOnly_pPb5.02TeV_LHC13bcAll_v5-04-55-AN.root
+		endif
+	endif
+
+	if( $dowhat == "m1" ) then
+		echo "Merging jobs ....."
+		./domerge 1
+	endif
+
+	if( $dowhat == "m2" ) then
+		echo "Merging files ....."
+		./domerge 2
+	endif
+
+
+	if( $dowhat == "clean" ||  $dowhat == "c" ) then 
+		rm -r outputs; rm -r exec_*
+	endif
+
+	if( $dowhat == "lolo" || $dowhat == "l" ) then 
+		./lolo #| grep Good | wc
+		sleep 3s
+	endif
+
+	cd ..
+
+end
+

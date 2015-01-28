@@ -1,0 +1,52 @@
+#!/bin/bash
+
+rcpath=$ALICE_ROOT/RuleChecker
+converter=src2srcml
+factex=$rcpath/FactExtractor.jar
+rckr=$rcpath/NewRuleChecker.jar
+convfile=$rcpath/CodingConventions.xml
+fullreport=./fullerr.txt
+
+# first make checker dir
+if [ -d checker ]
+then
+  rm -r checker/*
+else
+  mkdir checker
+fi
+
+if [ -f $fullreport ]
+then
+  rm $fullreport
+fi
+
+# copy .cxx and .h files
+rsync -av --exclude=*checker* --exclude=*G__* --exclude=*LinkDef* --exclude=*PROOF-INF* --include=*/ --include=*.cxx --include=*.h --exclude=* --exclude=CMake* ./ ./checker
+
+echo ""
+echo "Converting to xml..."
+
+# convert to xml
+for i in `find checker -type f | grep -e h$ -e cxx$`
+do
+  cd $(dirname $i)
+  filename=$(basename $i)
+  #$converter --language=C++ $filename -o $filename.xml
+  $converter --language=C++ $filename $filename.xml
+  cd - > /dev/null
+done
+
+echo ""
+
+for i in `find checker -type d`
+do
+  echo "Processing $i ..."
+  java -jar $factex $i $i
+  for j in `ls $i | grep -v xml | grep "\.h"`
+  do
+    java -jar $rckr $i/${j%%.*}.cxx.xml $i/${j%%.*}.h.xml $i/factFile.xml $convfile > $i/${j%%.*}.txt
+    echo "" >> $fullreport
+    echo "$i/${j%%.*} ========================================"  >> $fullreport
+    cat $i/${j%%.*}.txt >> $fullreport
+  done
+done

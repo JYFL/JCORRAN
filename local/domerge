@@ -1,0 +1,83 @@
+#! /bin/csh -f
+setenv HADD hadd # /home/djkim/utils/hadd/hadd
+
+set PROG=`basename $0`
+ if ( $#argv < 1 ) then
+  echo "Usage: $PROG [1=submit jobs, 2=sum groups, 3=serial no jobs]"
+  exit
+endif
+
+if( $1 != 1 && $1 != 2 && $1 != 3) then
+    echo "Wrong argument [1,2,3] not "$1
+    exit
+endif
+
+##################################
+setenv indir outputs
+set outname=`ls -l $indir | awk '{if(substr($1,1,1)=="d") print $9}'`
+#setenv inputFile   cardAlice_hh.input
+#setenv codeFile    'iaa_pythia.C JParticleTools.h JParticleTools.C JHistos.C JHistos.h JCorrelations.C JCorrelations.h JCard.h JCard.C JConst.h'
+#setenv configFile  config.cmnd
+setenv logFile     `ls  outputs/*/logs/* | head -2 | tail -1`
+setenv groups 200;
+##################################
+
+if( $1 != 2 ) then
+    rm -f $outname.root
+    rm -f $indir/list* $indir/*.list
+
+    ls -l $indir/$outname/data/*.root | awk '{if($5>1000) print $9}' >$indir/$outname.list
+    setenv nofiles `cat $indir/$outname.list |wc -l`
+    echo 'Merging  '$nofiles' files'
+    split -l $groups $indir/$outname.list $indir/list_
+endif
+
+
+if( $1 == 1 ) then
+
+    setenv ThisDir    `pwd`
+    setenv baseThisDir `basename $ThisDir`
+
+cat << EOF > exec_m_$baseThisDir
+#!/bin/bash
+cd $ThisDir
+export odir=outputs
+line=\$SLURM_ARRAY_TASK_ID 
+#line = \$1 
+export group=\`head -\$line \$odir/groups.list | tail -1\`
+$HADD -f \$odir/\${group}.root \`cat \$odir/\$group\` >& \$odir/\${group}_\$line.log
+EOF
+
+chmod +x exec_m_$baseThisDir
+    cd $indir; ls -1 list_* >groups.list; cd ..
+    setenv noGroupsToRun `cat $indir/groups.list | wc -l`
+    #qsub -V -t 1-$noGroupsToRun -S /bin/bash -r y -e $ThisDir/$indir -o $ThisDir/$indir exec_m_$baseThisDir
+	sbatch --array=1-$noGroupsToRun exec_m_$baseThisDir -J $baseThisDir  -e $ThisDir/$indir -o $ThisDir/$indir
+    exit
+endif
+
+if( $1 == 3 ) then
+    foreach flist ($indir/list_*)
+        echo $flist
+        set appx=`echo $flist|awk -F "_" '{print $2}'`
+        $HADD -f $indir/group_$appx.root `cat $flist`
+    end 
+endif
+
+$HADD -f $outname.root `ls $indir/*.root`
+
+#setenv homedir /mnt/flustre/rak/jtkt_data
+#setenv homedir ~/tmp
+#setenv homedir /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/data
+setenv homedir /mnt/flustre/alice/taxi_jcorran/2014/IAA_data/data 
+
+mv $outname.root $homedir
+cp $logFile $homedir/$outname.log
+cp $inputFile $homedir/$outname.input
+#tar -cvzf $homedir/$outname.z $codeFile
+#cp $configFile $homedir/$outname.cmnd
+
+rm $indir/$outname.list $indir/list* $indir/grou*
+bp 10
+
+

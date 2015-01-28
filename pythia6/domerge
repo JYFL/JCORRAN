@@ -1,0 +1,68 @@
+#! /bin/csh -f
+setenv HADD hadd # /home/djkim/utils/hadd/hadd
+
+set PROG=`basename $0`
+ if ( $#argv < 2 ) then
+  echo "Usage: $PROG [1=submit jobs, 2=sum groups]"
+  exit
+endif
+
+if( $1 != 1 && $1 != 2 ) then
+    echo "Wrong argument [1,2] not "$1
+    exit
+endif
+
+##################################
+setenv indir outputs
+set outname=$2
+setenv logFile     `ls  outputs/$outname/logs/* | head -2 | tail -1`
+setenv groups 200;
+##################################
+
+if( $1 != 2 ) then
+    rm -f $outname.root
+    rm -f $indir/list_${outname}_* $indir/$outname.list
+
+    ls -l $indir/$outname/data/*.root | awk '{if($5>1000) print $9}' >$indir/$outname.list
+    setenv nofiles `cat $indir/$outname.list |wc -l`
+    echo 'Merging  '$nofiles' files'
+    split -l $groups $indir/$outname.list $indir/list_${outname}_
+endif
+
+
+
+## START 1
+if( $1 == 1 ) then
+
+    setenv ThisDir    `pwd`
+    setenv baseThisDir `basename $ThisDir`
+
+cat << EOF > exec_m_$outname
+#!/bin/bash
+cd $ThisDir
+export odir=outputs
+line=\$SLURM_ARRAY_TASK_ID 
+#line = \$1 
+export group=\`head -\$line \$odir/groups_$outname.list | tail -1\`
+$HADD -f \$odir/\${group}.root \`cat \$odir/\$group\` >& \$odir/\${group}_\$line.log
+EOF
+
+chmod +x exec_m_$outname
+    cd $indir; ls -1 list_${outname}_* >groups_$outname.list; cd ..
+    setenv noGroupsToRun `cat $indir/groups_$outname.list | wc -l`
+	sbatch --array=1-$noGroupsToRun exec_m_$outname -J $outname  -e $ThisDir/$indir -o $ThisDir/$indir
+    exit
+endif
+## END 1
+
+$HADD -f $outname.root `ls $indir/list_${outname}_*.root`
+
+setenv homedir /mnt/flustre/alice/taxi_jcorran/2013/jtkt_data_all/pythia
+
+mv $outname.root $homedir
+cp $logFile $homedir/$outname.log
+
+rm $indir/$outname.list $indir/list_${outname}_* $indir/groups_$outname*
+bp 10
+
+

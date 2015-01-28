@@ -1,0 +1,12 @@
+include ( ${JCORRAN_CMAKE_DIR}/JCORRAN_CMake.cmake  OPTIONAL )
+# !!!! DON'T TOUCH ABOVE !!!!
+
+PROJECT ( dijet )
+JCORRAN_PACKAGE ( dijet )
+
+set ( SRCS ${JCORRAN_PACKAGE}.cxx )
+
+
+JCORRAN_ADD_DIR( ../PWGJCORRAN/src ../PWGJCORRAN/src/containers ../PWGJCORRAN/src/utils  )
+JCORRAN_ADD_LIB( JCORRAN )
+JCORRAN_BUILD_EXE()

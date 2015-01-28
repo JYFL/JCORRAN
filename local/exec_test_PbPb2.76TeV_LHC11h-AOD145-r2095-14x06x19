@@ -1,0 +1,20 @@
+#!/bin/bash
+cd $Main_DIR
+export what=./jtkt_alice
+line=$SLURM_ARRAY_TASK_ID
+export fullFile=`head -${line} $TodoList | tail -1`
+export indir=`dirname $fullFile`
+export runSegID=`basename $fullFile`
+export outfile=$Out_DIR/$runSegID.root
+export outlog=$LOG_DIR/$runSegID.log
+export mylist=$fullFile
+echo "RUN $what"
+echo ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile 
+case $comment in 
+    test )
+        ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile 
+        ;;
+    * )
+        ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile >& $outlog
+        ;;
+esac

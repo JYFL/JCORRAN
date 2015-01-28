@@ -1,0 +1,8 @@
+--- r1852 2013-10-07T16:11 
+* ready to run JCORRAN
+* implemented inclusive. 
+* TODO 
+  * Get bin information from inclusive file, not input jcard
+  * if cent, ptt, pta bin is different from input jcard. stop processes.
+  test
+--- need to update

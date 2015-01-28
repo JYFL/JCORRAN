@@ -1,0 +1,11 @@
+include ( ${JCORRAN_CMAKE_DIR}/JCORRAN_CMake.cmake  OPTIONAL )
+# !!!! DON'T TOUCH ABOVE !!!!
+
+PROJECT ( jtkt_alice )
+JCORRAN_PACKAGE ( jtkt_alice )
+
+set ( SRCS ${JCORRAN_PACKAGE}.cxx )
+
+JCORRAN_ADD_DIR( ../PWGJCORRAN/src ../PWGJCORRAN/src/containers ../PWGJCORRAN/src/utils )
+JCORRAN_ADD_LIB( JCORRAN )
+JCORRAN_BUILD_EXE()

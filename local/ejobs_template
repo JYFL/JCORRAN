@@ -1,0 +1,161 @@
+#!/bin/bash
+############################
+
+
+PROG=`basename $0`
+if [ $# -ne 2 ]
+then
+    echo "Usage: $PROG [strig to describe kind of analysis e.g. xe, azim, etc] "
+    exit;
+fi
+
+function setenv(){ export $1=$2; }
+setenv comment    $1
+setenv RUNPERIOD `echo $0 | perl -ne'/(LHC[a-zA-Z0-9]+)/ and print $1'` 
+setenv SVNREVISION      `svn info ../ | perl -anle'/Revision/ and print $F[1]'`
+setenv inclusFile $2    #Inclusives/PbPb_LP_FlatFid02_PbPb_V7_pass2.root
+
+#################################
+# Input picoDST file location
+#################################
+
+case $PROG in
+    ejobs_AA_2.7_LHC10h ) 
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/PbPb2.76TeV/PbPb2.76TeV_lhc10h_pass2_180113
+        export cardName=cardAlice_AA.input
+        ;;
+    ejobs_AA_2.7_LHC11h ) 
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/PbPb2.76TeV_LHC11h-AOD145-r2095-14x06x19
+        export cardName=cardAlice_AA.input
+        ;;
+    ejobs_pp_2.7_LHC10b )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/pp7TeV_LHC10b-r2095_AOD147_14x06x19
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pp_2.7_LHC10c )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/pp7TeV_LHC10c-r2095_AOD147-14x06x16
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pp_2.7_LHC11a )
+        #export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pp2.76TeV/pp2.76TeV_LHC11a_pass2_without_SDD_20130214
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/pp2.76TeV_LHC11a-AOD113-r2095
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pp_7.0_LHC10bcde )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pp7TeV/pp7TeV_LHC10bcde
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pp_7.0_LHC11bcde )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/pp7TeV_LHC11bcde-AOD118-r2095-2014x01x09
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pp_7.0_LHC11d )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2014/pp7TeV_LHC11d-AOD118-r2095-2014x01x09
+        export cardName=cardAlice_pp.input
+        ;;
+    ejobs_pA_5.0_LHC13bc )
+        #export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pA5.02TeV/pPb5.02TeV_LHC13bcAll_v5-04-55-AN
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pA5.02TeV/AOD/pPb5.02TeV_LHC13bc_AOD_v5-34-08-AN_r2023
+        export cardName=cardAlice_pA.input
+        ;;
+    ejobs_pA_5.0_LHC13de )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pA5.02TeV/AOD/pPb5.02TeV_LHC13de_AOD_v5-34-08-AN_r2023
+        export cardName=cardAlice_pA.input
+        ;;
+    ejobs_pA_5.0_LHC13bcde )
+        export inDIR=/mnt/flustre/alice/taxi_jcorran/2013/pA5.02TeV/AOD/pPb5.02TeV_LHC13bcde_AOD_v5-34-08-AN_r2085
+        export cardName=cardAlice_pA.input
+        ;;
+    * ) echo "!!! ERROR !!! No $RUNPERIOD info"
+        exit;
+esac
+
+setenv runlist $inDIR/list/runlist.txt
+setenv dirname `basename $inDIR`
+setenv oname     ${comment}"_"${dirname}   #_N${trigg}_A${assoc}
+
+#################################
+# Trigger and Associated particle
+# Input card to be used
+#################################
+setenv trigg     hadron
+setenv assoc     hadron
+
+#################################
+# Output file locations
+#################################
+setenv Main_DIR     `pwd`
+setenv OUT_ERRORS   $Main_DIR/outputs/${oname}/errors
+setenv Out_DIR      $Main_DIR/outputs/${oname}/data
+setenv LOG_DIR      $Main_DIR/outputs/${oname}/logs
+setenv LIST_DIR     $Main_DIR/outputs/${oname}/lists
+mkdir -p $OUT_ERRORS
+mkdir -p $Out_DIR
+mkdir -p $LOG_DIR
+mkdir -p $LIST_DIR
+
+### Copies base card into output directory
+export newCard=$Main_DIR/outputs/${oname}/$cardName
+#sed 's/HadronSelectionCut      3/HadronSelectionCut      '$HadronSelection'/g' $cardName > $newCard
+cat $cardName > $newCard
+
+echo "==== command  : $0"
+echo "==== Options  : $@"
+echo "==== PERIOD   : $RUNPERIOD"
+echo "==== DATA Dir : $inDIR"
+echo "==== Card     : $cardName"
+echo "==== Outputs  : $Main_DIR/outputs/$oname"
+
+#################################
+# Runlist to scan
+#################################
+echo "Making Todo list...."
+setenv nSPLIT 500 #  larger size for mixing. 100, 500, 1000, or "test"( 10 jobs of small set )
+setenv TodoList $inDIR/list/all_${nSPLIT}.list
+
+cd $Main_DIR
+
+setenv noFileToRun `cat $TodoList | wc -l`
+
+# simplify this !!! 
+cat << 'EOF' > exec_$oname
+#!/bin/bash
+cd $Main_DIR
+export what=./jtkt_alice
+line=$SLURM_ARRAY_TASK_ID
+export fullFile=`head -${line} $TodoList | tail -1`
+export indir=`dirname $fullFile`
+export runSegID=`basename $fullFile`
+export outfile=$Out_DIR/$runSegID.root
+export outlog=$LOG_DIR/$runSegID.log
+export mylist=$fullFile
+echo "RUN $what"
+echo ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile 
+case $comment in 
+    test )
+        ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile 
+        ;;
+    * )
+        ${what} $mylist $outfile $newCard $trigg $assoc $inclusFile >& $outlog
+        ;;
+esac
+EOF
+chmod +x exec_$oname
+
+
+case $comment in
+    test ) 
+        echo "========= TEST MODE ========"
+        setenv TodoList $inDIR/list/all_test.list
+        export SLURM_ARRAY_TASK_ID=1;
+        ./exec_$oname
+        ;;
+    * )
+        echo "$noFileToRun  jobs are submitted"
+        #qsub -V -t 1-$noFileToRun -S /bin/bash -r y -e $OUT_ERRORS -o $OUT_ERRORS exec_$oname
+		sbatch -v --array=1-$noFileToRun exec_$oname -J $oname  $OUT_ERRORS/stderr_%j_%t -o $OUT_ERRORS/stdout_%j_%t
+		#sbatch -v --array=1-$noFileToRun -J $oname  -e $OUT_ERRORS -o $OUT_ERRORS exec_$oname
+		#echo "sbatch -v --array=1-$noFileToRun -J $oname  -e $OUT_ERRORS/stderr_%j_%t -o $OUT_ERRORS/stdout_%j_%t exec_$oname"
+        ;;
+esac
+

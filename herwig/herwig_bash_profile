@@ -1,0 +1,33 @@
+export PATH="$PATH:/usr/local/bin"
+export PATH="$PATH:$HOME/bin"
+
+export ALICE_COMMON=/mnt/flustre/alice/common
+
+## FASTJET
+export FASTJET=$ALICE_COMMON/fastjet-3.0.6/install/bin
+export FASTJET_CONTRIB=/mnt/flustre/alice/common/fjcontrib-1.012/install;
+export LD_LIBRARY_PATH=$PYTHIA8/lib:$FASTJET/../lib:$LD_LIBRARY_PATH:$FASTJET_CONTRIB/lib
+
+## FFTW3 && GaussianFilter
+export FFTW3=$ALICE_COMMON/fftw
+export LD_LIBRARY_PATH=$FFTW3/lib:$ALICE_COMMON/GaussianFilter:$LD_LIBRARY_PATH
+
+## PYTHIA8
+export PYTHIA8=$ALICE_COMMON/pythia8176
+export PYTHIA8DATA=$PYTHIA8/xmldoc
+
+## ROOT
+source /mnt/flustre/alice/common/root/bin/thisroot.sh
+
+## HERWIG
+#export HERWIG=/mnt/flustre/bschang/work/jyfl_alice_fi/trunk/JCORRAN/herwig/try/Herwig
+#export THEPEG=/mnt/flustre/bschang/work/jyfl_alice_fi/trunk/JCORRAN/herwig/try/Herwig
+export HERWIG=/mnt/flustre/alice/common/alice2/Herwig/Herwig++-2.7.0
+export THEPEG=/mnt/flustre/alice/common/alice2/Herwig/ThePEG-1.9.1
+
+export LD_LIBRARY_PATH=$HERWIG/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$THEPEG/lib:$LD_LIBRARY_PATH
+export PATH=$PATH\:$HERWIG/bin:.
+
+## POST process
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
