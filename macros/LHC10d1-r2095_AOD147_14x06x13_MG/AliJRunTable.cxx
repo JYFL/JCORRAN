@@ -1,1 +1,0 @@
-../../PWGJCORRAN/src/AliJRunTable.cxx
